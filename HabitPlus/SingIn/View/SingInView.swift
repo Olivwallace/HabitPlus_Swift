@@ -11,9 +11,6 @@ struct SingInView: View {
     
     @ObservedObject var viewModel : SingInViewModel
     
-    @State var email : String = ""
-    @State var password : String = ""
-    
     @State var action: Int? = 0
     
     @State var navigationBarHidden = true
@@ -85,9 +82,9 @@ extension SingInView {
     var emailView: some View {
         EditTextView(
             placeholder: "E-mail",
-            text: $email,
+            text: $viewModel.email,
             error: "E-mail Invalido",
-            failure: !email.isEmail())
+            failure: !viewModel.email.isEmail())
     }
 }
 
@@ -96,9 +93,9 @@ extension SingInView {
     var passView: some View {
         EditTextView(
             placeholder: "Password",
-            text: $password,
+            text: $viewModel.password,
             error: "Senha deve conter 8 caracteres",
-            failure: password.count < 8,
+            failure: viewModel.password.count < 8,
             isSecure: true, keyboard: .emailAddress)
     }
 }
@@ -106,15 +103,14 @@ extension SingInView {
 // --------- Componente de Button Submit Login
 extension SingInView {
     var btnLoginView : some View {
-        Button("Entrar"){
+        LoadingButtonView(action: {
+            viewModel.login()
             
-            viewModel.login(email: email, password: password)
-            
-        }
-        .border(.clear)
-        .buttonStyle(.bordered)
-        .foregroundColor(Color.cyan)
-        .buttonBorderShape(.roundedRectangle(radius: 60))
+        },
+            text: "Entrar",
+            disabled: !viewModel.email.isEmail() || viewModel.password.count < 8,
+            showProgress:  self.viewModel.uiState == SingInUIState.loading
+        )
     }
 }
 

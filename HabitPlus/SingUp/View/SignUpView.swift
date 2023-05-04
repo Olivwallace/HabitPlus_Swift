@@ -10,15 +10,7 @@ import SwiftUI
 struct SingUpView: View {
     
     @ObservedObject var viewModel : SingUpViewModel
-    
-    @State var fullName = ""
-    @State var email = ""
-    @State var password = ""
-    @State var document = ""
-    @State var phone = ""
-    @State var birthday = ""
-    @State var gender = Gender.female
-    
+
     @State var navigationBarHidden = true
     
     var body: some View {
@@ -27,15 +19,15 @@ struct SingUpView: View {
                 viewModel.homeView()
             }else{
                 ScrollView(showsIndicators: false){
-                    VStack(alignment: .center, spacing: 30){
-                        Spacer(minLength: 50)
-                        VStack(alignment: .center, spacing: 10){
+                    VStack(alignment: .center, spacing: 5){
+                        Spacer(minLength: 40)
+                        VStack(alignment: .center, spacing: 15){
                             
                             //Exibe Imagem Logo
                             Image("logo")
                                 .resizable()
                                 .scaledToFit()
-                                .padding(.horizontal, 20)
+                                .padding(.horizontal, 10)
                                 .background(Color.white)
                             
                             Text("Cadastro")
@@ -81,60 +73,79 @@ struct SingUpView: View {
 //-------------- Componente de Input Name
 extension SingUpView {
     var fullNameView : some View {
-        TextField("Nome Completo", text: $fullName)
-            .border(.clear)
-            .textFieldStyle(.roundedBorder)
+        EditTextView(
+            placeholder: "Digite seu Nome Completo",
+            text: $viewModel.fullName,
+            error: "Comprimento do nome inválido",
+            failure: viewModel.fullName.count < 3)
     }
 }
 
 //-------------- Componente de Input Email
 extension SingUpView {
     var emailView : some View {
-        TextField("Email", text: $email)
-            .border(.clear)
-            .textFieldStyle(.roundedBorder)
+        EditTextView(
+            placeholder: "Digite seu Email",
+            text: $viewModel.email,
+            error: "Email inválido",
+            failure: !viewModel.email.isEmail(),
+            keyboard: .emailAddress)
     }
 }
 
 //-------------- Componente de Input Password
 extension SingUpView {
     var passView : some View {
-        SecureField("Password", text: $password)
-            .border(.clear)
-            .textFieldStyle(.roundedBorder)
+        EditTextView(
+            placeholder: "Digite sua Senha",
+            text: $viewModel.password,
+            error: "Senha inválida",
+            failure: viewModel.password.count < 8,
+            isSecure: true,
+            keyboard: .emailAddress)
     }
 }
 
 //-------------- Componente de Input Document
 extension SingUpView {
     var documentView : some View {
-        TextField("CPF", text: $document)
-            .border(.clear)
-            .textFieldStyle(.roundedBorder)
+        EditTextView(
+            placeholder: "Digite seu CPF",
+            text: $viewModel.document,
+            error: "CPF inválido - Somente Números",
+            failure: viewModel.document.count != 11,
+            keyboard: .numberPad)
     }
 }
 
 //-------------- Componente de Input Contato
 extension SingUpView {
     var phoneView : some View {
-        TextField("Telefone", text: $phone)
-            .border(.clear)
-            .textFieldStyle(.roundedBorder)
+        EditTextView(
+            placeholder: "Digite um Número de Contato",
+            text: $viewModel.phone,
+            error: "Telefone/Celular inválido - (99)99999-9999",
+            failure: viewModel.phone.count < 10 && viewModel.phone.count > 11 ,
+            keyboard: .numberPad)
     }
 }
 
 //-------------- Componente de Input Nascimento
 extension SingUpView {
     var birthdayView : some View {
-        TextField("Data Nascimento", text: $birthday)
-            .border(.clear)
-            .textFieldStyle(.roundedBorder)
+        EditTextView(
+            placeholder: "Digite sua Data de Nascimento",
+            text: $viewModel.birthday,
+            error: "Data inválida - DD/MM/AAAA",
+            failure: viewModel.birthday.count != 10,
+            keyboard: .default
+        )
     }
 }
 
 extension SingUpView {
     var genderView : some View {
-        Picker("Genero", selection: $gender){
+        Picker("Genero", selection: $viewModel.gender){
             ForEach(Gender.allCases, id: \.self){
                 value in
                 Text(value.rawValue)
@@ -148,14 +159,16 @@ extension SingUpView {
 // --------- Componente de Button Submit Login
 extension SingUpView {
     var btnSingUpView : some View{
-        Button("Concluir Cadastro"){
+        LoadingButtonView(action:{
             viewModel.singUp()
-        }
-        .border(.clear)
-        .buttonStyle(.bordered)
-        .foregroundColor(Color.cyan)
-        .buttonBorderShape(.roundedRectangle(radius: 15))
-        .padding(.vertical, 15)
+        },
+            text: "Entrar",
+                          disabled: !viewModel.email.isEmail() ||
+                          viewModel.password.count < 8 || viewModel.fullName.count < 3 ||
+                          viewModel.document.count != 11 || viewModel.phone.count < 10 ||
+                          viewModel.phone.count > 11 || viewModel.birthday.count != 10,
+            showProgress:  self.viewModel.uiState == SingUpUIState.loading
+        )
     }
 }
 

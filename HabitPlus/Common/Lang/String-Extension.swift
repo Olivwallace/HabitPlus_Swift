@@ -12,4 +12,5 @@ extension String{
         let regEx = "[A-Z0-9a-z._%+-]+@[A-Z0-9a-z.-]+\\.[A-Za-z]{2,64}"
         return NSPredicate(format: "SELF MATCHES %@", regEx).evaluate(with: self)
     }
+   
 }

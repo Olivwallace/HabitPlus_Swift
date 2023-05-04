@@ -14,6 +14,9 @@ class SingInViewModel : ObservableObject {
     private var cancellable: AnyCancellable?
     private let publisher = PassthroughSubject<Bool, Never>() // Passa Mensagens
     
+    @Published var email : String = ""
+    @Published var password : String = ""
+    
     @Published var uiState: SingInUIState = .none
     
     //--------------- Realiza esculta de mensagens
@@ -31,7 +34,7 @@ class SingInViewModel : ObservableObject {
     }
     
     
-    func login(email: String, password: String){
+    func login(){
         
         self.uiState = .loading
         

@@ -13,6 +13,16 @@ class SingUpViewModel : ObservableObject {
     
     var publisher: PassthroughSubject<Bool, Never>! //Obrigatório
     
+    
+    @Published var fullName = ""
+    @Published var email = ""
+    @Published var password = ""
+    @Published var document = ""
+    @Published var phone = ""
+    @Published var birthday = ""
+    @Published var gender = Gender.female
+    
+    
     @Published var uiState: SingUpUIState = .none
     
     func singUp (){

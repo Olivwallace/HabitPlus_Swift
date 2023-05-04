@@ -7,7 +7,7 @@
 
 import Foundation
 
-enum SingInUIState {
+enum SingInUIState : Equatable {
     case none
     case loading
     case goToHomeScreen
