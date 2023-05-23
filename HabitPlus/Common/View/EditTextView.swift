@@ -30,6 +30,7 @@ struct EditTextView: View {
                 TextField(placeholder, text: $text)
                     .keyboardType(keyboard)
                     .textFieldStyle(CustomTextFieldStyle())
+                    .textInputAutocapitalization(.never)
             }
             
             if let error = error, failure == true, !text.isEmpty{

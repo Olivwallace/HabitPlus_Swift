@@ -2,7 +2,7 @@
 //  SingUpView.swift
 //  HabitPlus
 //
-//  Created by coltec on 25/04/23.
+//  Created by Wallace Oliveira on 25/04/23.
 //
 
 import SwiftUI
@@ -162,7 +162,7 @@ extension SingUpView {
         LoadingButtonView(action:{
             viewModel.singUp()
         },
-            text: "Entrar",
+            text: "Concluir Cadastro",
                           disabled: !viewModel.email.isEmail() ||
                           viewModel.password.count < 8 || viewModel.fullName.count < 3 ||
                           viewModel.document.count != 11 || viewModel.phone.count < 10 ||
