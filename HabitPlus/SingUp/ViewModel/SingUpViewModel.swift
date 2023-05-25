@@ -60,11 +60,27 @@ class SingUpViewModel : ObservableObject {
             
             //Case Sucess
             if let success = successResp {
-                DispatchQueue.main.async {
-                    if success{
-                        self.uiState = .success
-                        self.publisher.send(success)
+                
+                WebService.login(request: SignInRequest(email: self.email,
+                                                        password: self.password)){ (successResp, errorResp) in
+                    
+                    // Case Error ao logar
+                    if let errorSignIn = errorResp {
+                        DispatchQueue.main.async {
+                            self.uiState = .error(errorSignIn.detail.message)
+                        }
                     }
+                    
+                    // Case Success ao logar
+                    if let successSignIn = successResp {
+                        DispatchQueue.main.async {
+                            print(successSignIn)
+                            self.publisher.send(true)
+                            self.uiState = .success
+                        }
+                    }
+                    
+                    
                 }
             }
             

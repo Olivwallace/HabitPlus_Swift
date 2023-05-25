@@ -38,6 +38,26 @@ class SingInViewModel : ObservableObject {
         
         self.uiState = .loading
         
+        WebService.login(request: SignInRequest(email: email, password: password)){
+            (sucessResponse, errorResponse) in
+            
+            // Case Error
+            if let error = errorResponse {
+                DispatchQueue.main.async{
+                    self.uiState = .error(error.detail.message)
+                }
+            }
+            
+            // Case Success
+            if let success = sucessResponse {
+                DispatchQueue.main.async {
+                    print(success)
+                    self.uiState = .goToHomeScreen
+                }
+            }
+            
+        }
+        
         DispatchQueue.main.asyncAfter(deadline: .now()  + 1){
             self.uiState = .goToHomeScreen
         }
