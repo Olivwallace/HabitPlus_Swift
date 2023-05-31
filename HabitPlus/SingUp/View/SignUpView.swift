@@ -15,9 +15,6 @@ struct SingUpView: View {
     
     var body: some View {
         ZStack{
-            if case SingUpUIState.success = viewModel.uiState {
-                viewModel.homeView()
-            }else{
                 ScrollView(showsIndicators: false){
                     VStack(alignment: .center, spacing: 5){
                         Spacer(minLength: 40)
@@ -68,7 +65,6 @@ struct SingUpView: View {
             }               // End if-else
         }                   // End ZStack
     }                       // End Some View
-}                           // End View
 
 //-------------- Componente de Input Name
 extension SingUpView {
@@ -175,6 +171,6 @@ extension SingUpView {
 
 struct SingUpView_Previews: PreviewProvider {
     static var previews: some View {
-        SingUpView(viewModel: SingUpViewModel())
+        SingUpView(viewModel: SingUpViewModel(interactor: SignUpInteractor()))
     }
 }

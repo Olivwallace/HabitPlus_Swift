@@ -24,7 +24,7 @@ struct SplashView: View {
                     viewModel.singInView()
                 
                 case .goToHomeScreen :
-                    Text("Loading Home Screen")
+                    viewModel.homeView()
                 
                 case .error(let errMsg) :
                     loadingView(error: errMsg)
@@ -69,7 +69,7 @@ extension SplashView {
 
 struct SplashView_Previews: PreviewProvider {
     static var previews: some View {
-        SplashView(viewModel: SplashViewModel())
+        SplashView(viewModel: SplashViewModel(interactor: SplashInteractor()))
     }
 }
 

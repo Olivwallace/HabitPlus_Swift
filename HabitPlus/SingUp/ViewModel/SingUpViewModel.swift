@@ -24,6 +24,20 @@ class SingUpViewModel : ObservableObject {
     
     @Published var uiState: SingUpUIState = .none
     
+    private let interactor: SignUpInteractor
+    private var cancellableSignUp: AnyCancellable?
+    private var cancellableSignIn: AnyCancellable?
+    
+    init(interactor: SignUpInteractor){
+        self.interactor = interactor
+    }
+    
+    deinit{
+        cancellableSignUp?.cancel()
+        cancellableSignIn?.cancel()
+    }
+    
+    
     func singUp (){
         self.uiState = .loading
         
@@ -43,47 +57,46 @@ class SingUpViewModel : ObservableObject {
         
         
         // Realiza chamada da API para realizar SingUp
-        WebService.postUser(request: SingUpRequest(fullName: fullName,
-                            email: email,
-                            password: password,
-                            document: document,
-                            phone: phone,
-                            birthday: birthday,
-                            gender: gender.index)){(successResp, errorResp) in
+        cancellableSignUp = interactor.postUser(request: SingUpRequest(fullName: fullName,
+                                                        email: email,
+                                                        password: password,
+                                                        document: document,
+                                                        phone: phone,
+                                                        birthday: birthday,
+                                                        gender: gender.index))
+        .receive(on: DispatchQueue.main)
+        .sink{ completion in
             
-            // Case Error
-            if let error = errorResp {
-                DispatchQueue.main.async {
-                    self.uiState = .error(error.detail)
-                }
+            switch(completion){
+                case .failure(let appError):
+                    self.uiState = .error(appError.message)
+                    break
+                case .finished:
+                    break
             }
-            
-            //Case Sucess
-            if let success = successResp {
+    
+        } receiveValue: { created in
                 
-                WebService.login(request: SignInRequest(email: self.email,
-                                                        password: self.password)){ (successResp, errorResp) in
+            if (created){
+                self.cancellableSignIn = self.interactor.login(request: SignInRequest(email: self.email,
+                                                                                      password: self.password))
+                .receive(on: DispatchQueue.main)
+                .sink{ completion in
                     
-                    // Case Error ao logar
-                    if let errorSignIn = errorResp {
-                        DispatchQueue.main.async {
-                            self.uiState = .error(errorSignIn.detail.message)
-                        }
+                    switch (completion){
+                        case .failure(let appError):
+                            self.uiState = .error(appError.message)
+                            break
+                        case .finished:
+                            break
                     }
                     
-                    // Case Success ao logar
-                    if let successSignIn = successResp {
-                        DispatchQueue.main.async {
-                            print(successSignIn)
-                            self.publisher.send(true)
-                            self.uiState = .success
-                        }
-                    }
-                    
-                    
+                } receiveValue: { sucessSignIn in
+                    print(created)
+                    self.publisher.send(created)
+                    self.uiState = .success
                 }
             }
-            
             
         } // End WebService.postUser
         

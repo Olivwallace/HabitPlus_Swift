@@ -146,6 +146,6 @@ extension SingInView {
 
 struct SingInView_Previews: PreviewProvider {
     static var previews: some View {
-        SingInView(viewModel: SingInViewModel())
+        SingInView(viewModel: SingInViewModel(interactor: SignInIteractor()))
     }
 }

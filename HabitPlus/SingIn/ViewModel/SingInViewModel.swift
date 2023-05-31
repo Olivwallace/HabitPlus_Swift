@@ -12,7 +12,10 @@ import Foundation
 class SingInViewModel : ObservableObject {
     
     private var cancellable: AnyCancellable?
+    private var cancellableRequest: AnyCancellable?
     private let publisher = PassthroughSubject<Bool, Never>() // Passa Mensagens
+    
+    private let interactor: SignInIteractor
     
     @Published var email : String = ""
     @Published var password : String = ""
@@ -20,12 +23,15 @@ class SingInViewModel : ObservableObject {
     @Published var uiState: SingInUIState = .none
     
     //--------------- Realiza esculta de mensagens
-    init(){
+    init(interactor: SignInIteractor){
+        self.interactor = interactor
+        
         cancellable = publisher.sink{ value in
             if(value){
                 self.uiState = .goToHomeScreen
             }
         }
+        
     }
     
     //--------------- Finaliza esculta
@@ -38,32 +44,30 @@ class SingInViewModel : ObservableObject {
         
         self.uiState = .loading
         
-        WebService.login(request: SignInRequest(email: email, password: password)){
-            (sucessResponse, errorResponse) in
-            
-            // Case Error
-            if let error = errorResponse {
-                DispatchQueue.main.async{
-                    self.uiState = .error(error.detail.message)
+        cancellableRequest = interactor.login(request: SignInRequest(email: email, password: password))
+            .receive(on: DispatchQueue.main)
+            .sink { completion in
+                
+                switch(completion){
+                    case .failure(let appError):
+                        self.uiState = SingInUIState.error(appError.message)
+                        break
+                    case .finished:
+                        break
                 }
-            }
-            
-            // Case Success
-            if let success = sucessResponse {
-                DispatchQueue.main.async {
-                    print(success)
-                    self.uiState = .goToHomeScreen
-                }
+                
+            } receiveValue: { sucess in
+                print(sucess)
+                self.interactor.insertAuth(userAuth: UserAuth(idToken: sucess.accessToken,
+                                                              refreshToken: sucess.refreshToken,
+                                                              expires: Date().timeIntervalSince1970 + Double(sucess.expires),
+                                                              tokenType: sucess.tokenType))
+                self.uiState = .goToHomeScreen
             }
             
         }
-        
-        DispatchQueue.main.asyncAfter(deadline: .now()  + 1){
-            self.uiState = .goToHomeScreen
-        }
-        
     }
-}
+
 
 extension SingInViewModel {
     func homeView() -> some View{
